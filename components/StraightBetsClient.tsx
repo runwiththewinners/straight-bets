@@ -1230,7 +1230,7 @@ export default function StraightBetsClient({
               background: "rgba(212,168,67,0.06)",
             }}
           >
-            Live Feed
+            🏀 Live Feed
           </div>
 
           <h1

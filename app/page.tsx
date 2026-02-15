@@ -29,14 +29,16 @@ async function getUserAccess(): Promise<UserAccess> {
       isAdmin = false;
     }
 
-    // Check access to each product using users.checkAccess
+    // Check access to each product
     const accessChecks = await Promise.allSettled(
       Object.entries(PRODUCTS).map(async ([tierName, productId]) => {
         try {
-          const access = await whopsdk.users.checkAccess(productId, {
-            id: userId,
-          });
-          return { tierName, hasAccess: access.has_access };
+          const access =
+            await whopsdk.access.checkIfUserHasAccessToAccessPass({
+              accessPassId: productId,
+              userId,
+            });
+          return { tierName, hasAccess: access.hasAccess };
         } catch {
           return { tierName, hasAccess: false };
         }

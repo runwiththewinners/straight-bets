@@ -1,60 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
 import { whopsdk } from "@/lib/whop-sdk";
-import { COMPANY_ID, PRODUCTS, PREMIUM_TIERS } from "@/lib/constants";
+import { COMPANY_ID, PREMIUM_TIERS } from "@/lib/constants";
 import type { Play } from "@/lib/types";
 
 // In-memory store (replace with a database in production)
 let plays: Play[] = [];
 
-async function getUser(request: NextRequest): Promise<{
-  userId: string | null;
+async function checkIsAdmin(request: NextRequest): Promise<{
   isAdmin: boolean;
-  hasPremiumAccess: boolean;
+  userId: string | null;
 }> {
   try {
     const { userId } = await whopsdk.verifyUserToken(request.headers);
-    if (!userId) return { userId: null, isAdmin: false, hasPremiumAccess: false };
+    if (!userId) return { isAdmin: false, userId: null };
 
-    // Check admin status
-    let isAdmin = false;
-    try {
-      const companyAccess = await whopsdk.users.checkAccess(COMPANY_ID, {
-        id: userId,
-      });
-      isAdmin = companyAccess.access_level === "admin";
-    } catch {
-      isAdmin = false;
-    }
+    const access = await whopsdk.users.checkAccess(COMPANY_ID, {
+      id: userId,
+    });
+    return { isAdmin: access.access_level === "admin", userId };
+  } catch {
+    return { isAdmin: false, userId: null };
+  }
+}
 
-    // Check premium access
+async function checkPremiumAccess(
+  request: NextRequest
+): Promise<{ userId: string; hasPremiumAccess: boolean } | null> {
+  try {
+    const { userId } = await whopsdk.verifyUserToken(request.headers);
+    if (!userId) return null;
+
     let hasPremiumAccess = false;
     for (const productId of PREMIUM_TIERS) {
       try {
-        const access = await whopsdk.users.checkAccess(productId, {
-          id: userId,
-        });
-        if (access.has_access) {
+        const access =
+          await whopsdk.access.checkIfUserHasAccessToAccessPass({
+            accessPassId: productId,
+            userId,
+          });
+        if (access.hasAccess) {
           hasPremiumAccess = true;
           break;
         }
       } catch {}
     }
 
-    return { userId, isAdmin, hasPremiumAccess };
+    return { userId, hasPremiumAccess };
   } catch {
-    return { userId: null, isAdmin: false, hasPremiumAccess: false };
+    return null;
   }
 }
 
 // GET /api/plays
 export async function GET(request: NextRequest) {
-  const user = await getUser(request);
-  if (!user.userId) {
+  const user = await checkPremiumAccess(request);
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (user.hasPremiumAccess || user.isAdmin) {
-    return NextResponse.json({ plays, isAdmin: user.isAdmin });
+  const { isAdmin } = await checkIsAdmin(request);
+
+  if (user.hasPremiumAccess || isAdmin) {
+    return NextResponse.json({ plays, isAdmin });
   } else {
     const redactedPlays = plays
       .filter((p) => p.result === "pending")
@@ -77,8 +84,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/plays (admin only)
 export async function POST(request: NextRequest) {
-  const user = await getUser(request);
-  if (!user.isAdmin) {
+  const { isAdmin, userId } = await checkIsAdmin(request);
+  if (!isAdmin) {
     return NextResponse.json(
       { error: "Admin access required" },
       { status: 403 }
@@ -114,8 +121,8 @@ export async function POST(request: NextRequest) {
 
 // PATCH /api/plays (admin only)
 export async function PATCH(request: NextRequest) {
-  const user = await getUser(request);
-  if (!user.isAdmin) {
+  const { isAdmin } = await checkIsAdmin(request);
+  if (!isAdmin) {
     return NextResponse.json(
       { error: "Admin access required" },
       { status: 403 }
