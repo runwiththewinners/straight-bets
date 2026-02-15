@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { whopsdk } from "@/lib/whop-sdk";
-import { PRODUCTS, COMPANY_ID, PREMIUM_TIERS } from "@/lib/constants";
+import { COMPANY_ID, PREMIUM_TIERS } from "@/lib/constants";
+import { redisGet, redisSet } from "@/lib/redis";
 import type { Play, BetResult } from "@/lib/types";
 
-let plays: Play[] = [];
+const PLAYS_KEY = "straight-bets:plays";
+
+async function getPlays(): Promise<Play[]> {
+  const plays = await redisGet(PLAYS_KEY);
+  return plays || [];
+}
+
+async function savePlays(plays: Play[]): Promise<void> {
+  await redisSet(PLAYS_KEY, plays);
+}
 
 async function getUser(request: NextRequest): Promise<{
   userId: string | null;
@@ -39,6 +49,8 @@ export async function GET(request: NextRequest) {
   if (!user.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const plays = await getPlays();
 
   if (user.hasPremiumAccess || user.isAdmin) {
     return NextResponse.json({ plays, isAdmin: user.isAdmin });
@@ -78,7 +90,9 @@ export async function POST(request: NextRequest) {
     createdAt: Date.now(),
   };
 
+  const plays = await getPlays();
   plays.unshift(newPlay);
+  await savePlays(plays);
   return NextResponse.json({ play: newPlay, success: true });
 }
 
@@ -90,9 +104,11 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json();
   const { id, result } = body;
+  const plays = await getPlays();
   const play = plays.find((p) => p.id === id);
   if (play) {
     play.result = result as BetResult;
+    await savePlays(plays);
   }
   return NextResponse.json({ play, success: true });
 }
@@ -105,10 +121,12 @@ export async function DELETE(request: NextRequest) {
 
   const body = await request.json();
   const { id } = body;
+  let plays = await getPlays();
   const index = plays.findIndex((p) => p.id === id);
   if (index === -1) {
     return NextResponse.json({ error: "Play not found" }, { status: 404 });
   }
   plays.splice(index, 1);
+  await savePlays(plays);
   return NextResponse.json({ success: true, id });
 }
