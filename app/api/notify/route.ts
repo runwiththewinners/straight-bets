@@ -30,19 +30,24 @@ export async function POST(request: NextRequest) {
   const { team, odds, sport, experienceId, companyId } = body;
 
   try {
-    const notificationParams: Record<string, any> = {
-      title: `🔥 New Straight Bet — ${sport}`,
-      subtitle: "FlareGotLocks just dropped a play",
-      content: `${team} (${odds}) — Check it now!`,
-    };
+    let result;
 
     if (experienceId) {
-      notificationParams.experience_id = experienceId;
-    } else if (companyId) {
-      notificationParams.company_id = companyId;
+      result = await whopsdk.notifications.create({
+        experience_id: experienceId,
+        title: `🔥 New Straight Bet — ${sport}`,
+        subtitle: "FlareGotLocks just dropped a play",
+        content: `${team} (${odds}) — Check it now!`,
+      });
+    } else {
+      result = await whopsdk.notifications.create({
+        company_id: companyId || COMPANY_ID,
+        title: `🔥 New Straight Bet — ${sport}`,
+        subtitle: "FlareGotLocks just dropped a play",
+        content: `${team} (${odds}) — Check it now!`,
+      });
     }
 
-    const result = await whopsdk.notifications.create(notificationParams);
     return NextResponse.json({ success: true, result });
   } catch (error: any) {
     console.error("Notification error:", error);
