@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
     ...p,
     team: "XXXXXXXXXX",
     odds: "XXX",
+    slipImage: undefined,
   }));
   return NextResponse.json({ plays: redacted, isAdmin: false });
 }
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
     sport: body.sport,
     result: "pending" as BetResult,
     units: body.units || 1,
+    slipImage: body.slipImage || undefined,
     postedAt: new Date().toLocaleString("en-US", {
       month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
       hour12: true, timeZone: "America/New_York",
@@ -93,4 +95,20 @@ export async function PATCH(request: NextRequest) {
     play.result = result as BetResult;
   }
   return NextResponse.json({ play, success: true });
+}
+
+export async function DELETE(request: NextRequest) {
+  const user = await getUser(request);
+  if (!user.isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const { id } = body;
+  const index = plays.findIndex((p) => p.id === id);
+  if (index === -1) {
+    return NextResponse.json({ error: "Play not found" }, { status: 404 });
+  }
+  plays.splice(index, 1);
+  return NextResponse.json({ success: true, id });
 }
