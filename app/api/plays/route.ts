@@ -1,95 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 import { whopsdk } from "@/lib/whop-sdk";
-import { COMPANY_ID, PREMIUM_TIERS } from "@/lib/constants";
-import type { Play } from "@/lib/types";
+import { PRODUCTS, COMPANY_ID, PREMIUM_TIERS } from "@/lib/constants";
+import type { Play, BetResult } from "@/lib/types";
 
-// In-memory store (replace with a database in production)
 let plays: Play[] = [];
 
-async function checkIsAdmin(request: NextRequest): Promise<{
-  isAdmin: boolean;
+async function getUser(request: NextRequest): Promise<{
   userId: string | null;
+  isAdmin: boolean;
+  hasPremiumAccess: boolean;
 }> {
   try {
     const { userId } = await whopsdk.verifyUserToken(request.headers);
-    if (!userId) return { isAdmin: false, userId: null };
+    if (!userId) return { userId: null, isAdmin: false, hasPremiumAccess: false };
 
-    const access = await whopsdk.users.checkAccess(COMPANY_ID, {
-      id: userId,
-    });
-    return { isAdmin: access.access_level === "admin", userId };
-  } catch {
-    return { isAdmin: false, userId: null };
-  }
-}
-
-async function checkPremiumAccess(
-  request: NextRequest
-): Promise<{ userId: string; hasPremiumAccess: boolean } | null> {
-  try {
-    const { userId } = await whopsdk.verifyUserToken(request.headers);
-    if (!userId) return null;
+    let isAdmin = false;
+    try {
+      const companyAccess = await whopsdk.users.checkAccess(COMPANY_ID, { id: userId });
+      isAdmin = companyAccess.access_level === "admin";
+    } catch { isAdmin = false; }
 
     let hasPremiumAccess = false;
     for (const productId of PREMIUM_TIERS) {
       try {
-        const access =
-          await whopsdk.access.checkIfUserHasAccessToAccessPass({
-            accessPassId: productId,
-            userId,
-          });
-        if (access.hasAccess) {
-          hasPremiumAccess = true;
-          break;
-        }
+        const access = await whopsdk.users.checkAccess(productId, { id: userId });
+        if (access.has_access) { hasPremiumAccess = true; break; }
       } catch {}
     }
 
-    return { userId, hasPremiumAccess };
+    return { userId, isAdmin, hasPremiumAccess };
   } catch {
-    return null;
+    return { userId: null, isAdmin: false, hasPremiumAccess: false };
   }
 }
 
-// GET /api/plays
 export async function GET(request: NextRequest) {
-  const user = await checkPremiumAccess(request);
-  if (!user) {
+  const user = await getUser(request);
+  if (!user.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { isAdmin } = await checkIsAdmin(request);
-
-  if (user.hasPremiumAccess || isAdmin) {
-    return NextResponse.json({ plays, isAdmin });
-  } else {
-    const redactedPlays = plays
-      .filter((p) => p.result === "pending")
-      .map((p) => ({
-        id: p.id,
-        sport: p.sport,
-        postedAt: p.postedAt,
-        result: p.result,
-        team: "🔒 Locked",
-        betType: p.betType,
-        odds: "🔒",
-        matchup: "🔒 Upgrade to view",
-        time: p.time,
-        units: 0,
-        createdAt: p.createdAt,
-      }));
-    return NextResponse.json({ plays: redactedPlays, isAdmin: false });
+  if (user.hasPremiumAccess || user.isAdmin) {
+    return NextResponse.json({ plays, isAdmin: user.isAdmin });
   }
+
+  const redacted = plays.map((p) => ({
+    ...p,
+    team: "XXXXXXXXXX",
+    odds: "XXX",
+  }));
+  return NextResponse.json({ plays: redacted, isAdmin: false });
 }
 
-// POST /api/plays (admin only)
 export async function POST(request: NextRequest) {
-  const { isAdmin, userId } = await checkIsAdmin(request);
-  if (!isAdmin) {
-    return NextResponse.json(
-      { error: "Admin access required" },
-      { status: 403 }
-    );
+  const user = await getUser(request);
+  if (!user.isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
 
   const body = await request.json();
@@ -101,17 +67,12 @@ export async function POST(request: NextRequest) {
     matchup: body.matchup,
     time: body.time,
     sport: body.sport,
-    result: "pending",
-    postedAt:
-      new Date().toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "America/New_York",
-      }) + " ET",
+    result: "pending" as BetResult,
     units: body.units || 1,
+    postedAt: new Date().toLocaleString("en-US", {
+      month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+      hour12: true, timeZone: "America/New_York",
+    }) + " ET",
     createdAt: Date.now(),
   };
 
@@ -119,24 +80,17 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ play: newPlay, success: true });
 }
 
-// PATCH /api/plays (admin only)
 export async function PATCH(request: NextRequest) {
-  const { isAdmin } = await checkIsAdmin(request);
-  if (!isAdmin) {
-    return NextResponse.json(
-      { error: "Admin access required" },
-      { status: 403 }
-    );
+  const user = await getUser(request);
+  if (!user.isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
 
   const body = await request.json();
   const { id, result } = body;
-
-  const playIndex = plays.findIndex((p) => p.id === id);
-  if (playIndex === -1) {
-    return NextResponse.json({ error: "Play not found" }, { status: 404 });
+  const play = plays.find((p) => p.id === id);
+  if (play) {
+    play.result = result as BetResult;
   }
-
-  plays[playIndex].result = result;
-  return NextResponse.json({ play: plays[playIndex], success: true });
+  return NextResponse.json({ play, success: true });
 }
