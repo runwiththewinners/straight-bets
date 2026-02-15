@@ -7,41 +7,31 @@ import StraightBetsClient from "@/components/StraightBetsClient";
 async function getUserAccess(): Promise<UserAccess> {
   try {
     const headersList = headers();
-    const { userId } = await whopsdk.verifyUserToken(headersList);
+    let userId: string | null = null;
+
+    try {
+      const token = await whopsdk.verifyUserToken(headersList);
+      userId = token.userId;
+    } catch {
+      return { hasPremiumAccess: false, isAdmin: false, userId: null, tier: "FREE" };
+    }
 
     if (!userId) {
-      return {
-        hasPremiumAccess: false,
-        isAdmin: false,
-        userId: null,
-        tier: "FREE",
-      };
+      return { hasPremiumAccess: false, isAdmin: false, userId: null, tier: "FREE" };
     }
 
-    // Check if user is an admin (team member) of the company
     let isAdmin = false;
     try {
-      const companyAccess = await whopsdk.users.checkAccess(COMPANY_ID, {
-        id: userId,
-      });
+      const companyAccess = await whopsdk.users.checkAccess(COMPANY_ID, { id: userId });
       isAdmin = companyAccess.access_level === "admin";
-    } catch {
-      isAdmin = false;
-    }
+    } catch { isAdmin = false; }
 
-    // Check access to each product
     const accessChecks = await Promise.allSettled(
       Object.entries(PRODUCTS).map(async ([tierName, productId]) => {
         try {
-          const access =
-            await whopsdk.access.checkIfUserHasAccessToAccessPass({
-              accessPassId: productId,
-              userId,
-            });
-          return { tierName, hasAccess: access.hasAccess };
-        } catch {
-          return { tierName, hasAccess: false };
-        }
+          const access = await whopsdk.users.checkAccess(productId, { id: userId! });
+          return { tierName, hasAccess: access.has_access };
+        } catch { return { tierName, hasAccess: false }; }
       })
     );
 
@@ -65,17 +55,11 @@ async function getUserAccess(): Promise<UserAccess> {
     return { hasPremiumAccess, isAdmin, userId, tier };
   } catch (error) {
     console.error("Error checking user access:", error);
-    return {
-      hasPremiumAccess: false,
-      isAdmin: false,
-      userId: null,
-      tier: "FREE",
-    };
+    return { hasPremiumAccess: false, isAdmin: false, userId: null, tier: "FREE" };
   }
 }
 
 export default async function Page() {
   const userAccess = await getUserAccess();
-
   return <StraightBetsClient userAccess={userAccess} />;
 }
