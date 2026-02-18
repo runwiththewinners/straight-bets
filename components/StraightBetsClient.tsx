@@ -160,6 +160,7 @@ function PlayCard({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span
               style={{
                 fontSize: 11,
                 fontFamily: "'Courier Prime', monospace",
