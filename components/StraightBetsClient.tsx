@@ -160,23 +160,6 @@ function PlayCard({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {play.units > 0 && (
-              <span
-                style={{
-                  fontSize: 11,
-                  fontFamily: "'Courier Prime', monospace",
-                  color: "#d4a843",
-                  background: "rgba(212, 168, 67, 0.1)",
-                  border: "1px solid rgba(212, 168, 67, 0.2)",
-                  borderRadius: 6,
-                  padding: "3px 8px",
-                  letterSpacing: 1,
-                }}
-              >
-                {play.units}U
-              </span>
-            )}
-            <span
               style={{
                 fontSize: 11,
                 fontFamily: "'Courier Prime', monospace",
@@ -607,7 +590,6 @@ function AdminPanel({
   const [matchup, setMatchup] = useState("");
   const [time, setTime] = useState("");
   const [sport, setSport] = useState<Sport>("NCAAB");
-  const [units, setUnits] = useState("1");
   const [scanning, setScanning] = useState(false);
   const [scanPreview, setScanPreview] = useState<string | null>(null);
   const [scanError, setScanError] = useState("");
@@ -621,7 +603,6 @@ function AdminPanel({
       matchup,
       time,
       sport,
-      units: parseFloat(units) || 1,
       slipImage: scanPreview || undefined,
     });
     setTeam("");
@@ -989,14 +970,6 @@ function AdminPanel({
           </select>
         </div>
         <div>
-          <label style={labelStyle}>Units</label>
-          <input
-            style={inputStyle}
-            placeholder="1"
-            value={units}
-            onChange={(e) => setUnits(e.target.value)}
-          />
-        </div>
       </div>
 
       <button
