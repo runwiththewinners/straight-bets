@@ -937,7 +937,7 @@ function AdminPanel({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
+          gridTemplateColumns: "1fr 1fr",
           gap: 16,
           marginBottom: 20,
         }}
@@ -971,7 +971,6 @@ function AdminPanel({
           </select>
         </div>
         <div>
-      </div>
 
       <button
         onClick={handlePost}
