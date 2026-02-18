@@ -3,24 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Play, BetResult, UserAccess, Sport, BetType } from "@/lib/types";
 
-// Compress image to reduce size for storage
-function compressImage(base64: string, maxWidth = 800, quality = 0.6): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new (window.Image)();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      let w = img.width;
-      let h = img.height;
-      if (w > maxWidth) { h = (h * maxWidth) / w; w = maxWidth; }
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext("2d")!;
-      ctx.drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL("image/jpeg", quality));
-    };
-    img.src = base64;
-  });
-}
 
 const SPORTS_ICONS: Record<string, string> = {
   NBA: "🏀",
@@ -623,7 +605,7 @@ function AdminPanel({
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const base64Full = ev.target?.result as string;
-      compressImage(base64Full).then(compressed => setScanPreview(compressed));
+      setScanPreview(base64Full);
       const base64Data = base64Full.split(",")[1];
       const mediaType = file.type || "image/png";
 
