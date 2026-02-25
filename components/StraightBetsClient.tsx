@@ -169,6 +169,7 @@ function PlayCard({
           </div>
         </div>
 
+        {play.slipImage ? null : (<>
         {/* Inner card with pick details */}
         <div
           style={{
@@ -233,6 +234,7 @@ function PlayCard({
           </div>
         </div>
 
+        </>)}
         {/* Bet Slip Image */}
         {play.slipImage && (
           <div
