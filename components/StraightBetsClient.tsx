@@ -1307,39 +1307,7 @@ export default function StraightBetsClient({
             🎯 Live Feed
           </div>
 
-          <h1
-            style={{
-              fontSize: 48,
-              fontFamily: "'Oswald', sans-serif",
-              fontWeight: 800,
-              lineHeight: 1,
-              textTransform: "uppercase",
-              marginBottom: 4,
-            }}
-          >
-            <span style={{ color: "#f5f5f5" }}>Straight</span>
-            <br />
-            <span
-              style={{
-                color: "#d4a843",
-              }}
-            >
-              Bets
-            </span>
-          </h1>
 
-          <p
-            style={{
-              fontSize: 13,
-              color: "#6b7280",
-              maxWidth: 380,
-              margin: "12px auto 0",
-              lineHeight: 1.6,
-              fontFamily: "'Courier Prime', monospace",
-            }}
-          >
-            Every straight bet play, posted live.
-          </p>
         </div>
 
         {/* Filter tabs */}
