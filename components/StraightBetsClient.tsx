@@ -1526,9 +1526,34 @@ export default function StraightBetsClient({
                   />
                 ))
               ) : (
-                pendingPlays.map((play) => (
-                  <PaywallCard key={play.id} play={play} />
-                ))
+                <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                  <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+                  <div style={{ fontSize: 28, fontFamily: "'Oswald', sans-serif", fontWeight: 800, color: '#f5f5f5', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>PREMIUM CONTENT</div>
+                  <div style={{ fontSize: 13, color: '#6b7280', fontFamily: "'Courier Prime', monospace", lineHeight: 1.6, marginBottom: 8 }}>
+                    {pendingPlays.length} active pick{pendingPlays.length !== 1 ? 's' : ''} available
+                  </div>
+                  <div style={{ fontSize: 12, color: '#4b5563', fontFamily: "'Courier Prime', monospace", lineHeight: 1.6, marginBottom: 28, maxWidth: 320, margin: '0 auto 28px' }}>
+                    Upgrade to Premium or High Rollers to unlock all Straight Bet picks and full bet slip access.
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 280, margin: '0 auto' }}>
+                    <button onClick={() => window.parent.postMessage({ type: 'whop:navigate', productId: 'prod_o1jjamUG8rP8W' }, '*')} style={{
+                      padding: '14px 28px', borderRadius: 12, border: '1px solid rgba(212,168,67,0.5)',
+                      background: 'linear-gradient(135deg, rgba(212,168,67,0.15), rgba(184,134,11,0.08))',
+                      color: '#d4a843', fontSize: 14, fontFamily: "'Oswald', sans-serif",
+                      fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', cursor: 'pointer',
+                    }}>
+                      🏆 UPGRADE TO PREMIUM
+                    </button>
+                    <button onClick={() => window.parent.postMessage({ type: 'whop:navigate', productId: 'prod_bNsUIqwSfzLzU' }, '*')} style={{
+                      padding: '14px 28px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
+                      background: 'rgba(255,255,255,0.03)',
+                      color: '#9ca3af', fontSize: 12, fontFamily: "'Oswald', sans-serif",
+                      fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', cursor: 'pointer',
+                    }}>
+                      💎 HIGH ROLLERS
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 
