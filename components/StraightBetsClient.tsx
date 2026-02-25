@@ -370,7 +370,7 @@ function PlayCard({
 // ─── Paywall Card ────────────────────────────────────────────────
 function PaywallCard({ play }: { play: Play }) {
   const handleUpgrade = () => {
-    window.open('https://whop.com/run-with-the-winners/?product=prod_o1jjamUG8rP8W', '_blank');
+    window.open('https://whop.com/rwtw/rwtw/?utm_source=store_page&funnelId=store_063b60b3-5217-406f-90e5-0460512a85a2', '_blank');
   };
 
   return (
@@ -1516,7 +1516,7 @@ export default function StraightBetsClient({
                     Upgrade to Premium or High Rollers to unlock all Straight Bet picks and full bet slip access.
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 280, margin: '0 auto' }}>
-                    <button onClick={() => window.open('https://whop.com/run-with-the-winners/?product=prod_o1jjamUG8rP8W', '_blank')} style={{
+                    <button onClick={() => window.open('https://whop.com/rwtw/rwtw/?utm_source=store_page&funnelId=store_063b60b3-5217-406f-90e5-0460512a85a2', '_blank')} style={{
                       padding: '14px 28px', borderRadius: 12, border: '1px solid rgba(212,168,67,0.5)',
                       background: 'linear-gradient(135deg, rgba(212,168,67,0.15), rgba(184,134,11,0.08))',
                       color: '#d4a843', fontSize: 14, fontFamily: "'Oswald', sans-serif",
@@ -1524,7 +1524,7 @@ export default function StraightBetsClient({
                     }}>
                       🏆 UPGRADE TO PREMIUM
                     </button>
-                    <button onClick={() => window.open('https://whop.com/run-with-the-winners/?product=prod_bNsUIqwSfzLzU', '_blank')} style={{
+                    <button onClick={() => window.open('https://whop.com/rwtw/rwtw-premium-copy/?utm_source=store_page&funnelId=store_063b60b3-5217-406f-90e5-0460512a85a2', '_blank')} style={{
                       padding: '14px 28px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
                       background: 'rgba(255,255,255,0.03)',
                       color: '#9ca3af', fontSize: 12, fontFamily: "'Oswald', sans-serif",
