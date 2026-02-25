@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Play, BetResult, UserAccess, Sport, BetType } from "@/lib/types";
 
-
 const SPORTS_ICONS: Record<string, string> = {
   NBA: "🏀",
   NFL: "🏈",
@@ -41,31 +40,35 @@ const SPORTS: Sport[] = [
 
 const RESULT_STYLES: Record<
   BetResult,
-  { bg: string; border: string; text: string; label: string }
+  { bg: string; border: string; text: string; label: string; glow: string }
 > = {
   win: {
-    bg: "rgba(34, 197, 94, 0.12)",
-    border: "rgba(34, 197, 94, 0.4)",
+    bg: "rgba(34, 197, 94, 0.08)",
+    border: "rgba(34, 197, 94, 0.5)",
     text: "#22c55e",
-    label: "WIN ✓",
+    label: "WIN",
+    glow: "0 0 20px rgba(34, 197, 94, 0.15)",
   },
   loss: {
-    bg: "rgba(239, 68, 68, 0.12)",
-    border: "rgba(239, 68, 68, 0.4)",
+    bg: "rgba(239, 68, 68, 0.08)",
+    border: "rgba(239, 68, 68, 0.5)",
     text: "#ef4444",
-    label: "LOSS ✗",
+    label: "LOSS",
+    glow: "0 0 20px rgba(239, 68, 68, 0.15)",
   },
   push: {
-    bg: "rgba(234, 179, 8, 0.12)",
-    border: "rgba(234, 179, 8, 0.4)",
+    bg: "rgba(234, 179, 8, 0.08)",
+    border: "rgba(234, 179, 8, 0.5)",
     text: "#eab308",
     label: "PUSH",
+    glow: "0 0 20px rgba(234, 179, 8, 0.15)",
   },
   pending: {
-    bg: "rgba(255, 255, 255, 0.04)",
-    border: "rgba(255, 255, 255, 0.1)",
+    bg: "rgba(212, 168, 67, 0.03)",
+    border: "rgba(212, 168, 67, 0.2)",
     text: "#9ca3af",
     label: "PENDING",
+    glow: "0 0 20px rgba(212, 168, 67, 0.08)",
   },
 };
 
@@ -87,24 +90,26 @@ function PlayCard({
   return (
     <div
       style={{
-        background: result.bg,
+        background: "#111111",
         border: `1px solid ${result.border}`,
         borderRadius: 16,
         overflow: "hidden",
         animation: "fadeSlideIn 0.5s ease forwards",
+        boxShadow: result.glow,
       }}
     >
+      {/* Green accent bar */}
       <div
         style={{
           height: 3,
           background: isPending
-            ? "linear-gradient(90deg, #b8860b, #d4a843, #b8860b)"
+            ? "linear-gradient(90deg, transparent, #d4a843, transparent)"
             : `linear-gradient(90deg, transparent, ${result.text}, transparent)`,
         }}
       />
 
       <div style={{ padding: "20px 24px" }}>
-        {/* Header */}
+        {/* Header row */}
         <div
           style={{
             display: "flex",
@@ -125,9 +130,10 @@ function PlayCard({
                   color: "#d4a843",
                   letterSpacing: 2,
                   textTransform: "uppercase",
+                  fontWeight: 700,
                 }}
               >
-                {play.sport}
+                STRAIGHT BET
               </div>
               <div
                 style={{
@@ -142,17 +148,20 @@ function PlayCard({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span
+            <span
               style={{
                 fontSize: 11,
                 fontFamily: "'Courier Prime', monospace",
-                color: result.text,
-                background: result.bg,
-                border: `1px solid ${result.border}`,
+                color: isPending ? "#d4a843" : result.text,
+                background: isPending
+                  ? "rgba(212, 168, 67, 0.1)"
+                  : result.bg,
+                border: `1px solid ${isPending ? "rgba(212, 168, 67, 0.3)" : result.border}`,
                 borderRadius: 6,
-                padding: "3px 8px",
-                letterSpacing: 1,
+                padding: "3px 10px",
+                letterSpacing: 2,
                 fontWeight: 700,
+                textTransform: "uppercase",
               }}
             >
               {result.label}
@@ -160,8 +169,16 @@ function PlayCard({
           </div>
         </div>
 
-        {/* Pick */}
-        <div style={{ marginBottom: 12 }}>
+        {/* Inner card with pick details */}
+        <div
+          style={{
+            background: "rgba(212, 168, 67, 0.03)",
+            border: "1px solid rgba(212, 168, 67, 0.1)",
+            borderRadius: 12,
+            padding: "16px 20px",
+            marginBottom: 16,
+          }}
+        >
           <div
             style={{
               display: "flex",
@@ -171,7 +188,7 @@ function PlayCard({
           >
             <div
               style={{
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: 800,
                 color: "#f5f5f5",
                 fontFamily: "'Oswald', sans-serif",
@@ -181,28 +198,38 @@ function PlayCard({
             >
               {play.team}
             </div>
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 800,
-                color: isPending ? "#d4a843" : result.text,
-                fontFamily: "'Oswald', sans-serif",
-              }}
-            >
-              {play.odds}
+            <div style={{ textAlign: "right" }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontFamily: "'Courier Prime', monospace",
+                  color: "#6b7280",
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                }}
+              >
+                {play.sport}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "#6b7280",
+                  fontFamily: "'Courier Prime', monospace",
+                }}
+              >
+                {play.matchup}
+              </div>
             </div>
           </div>
           <div
             style={{
-              fontSize: 11,
-              color: "#6b7280",
+              fontSize: 13,
+              color: "#d4a843",
               fontFamily: "'Courier Prime', monospace",
-              letterSpacing: 1.5,
-              textTransform: "uppercase",
-              marginTop: 4,
+              marginTop: 6,
             }}
           >
-            {play.betType}
+            {play.betType} {play.odds}
           </div>
         </div>
 
@@ -210,11 +237,11 @@ function PlayCard({
         {play.slipImage && (
           <div
             style={{
-              margin: "14px 0",
+              marginBottom: 16,
               borderRadius: 12,
               overflow: "hidden",
-              border: "1px solid rgba(212,168,67,0.15)",
-              background: "rgba(0,0,0,0.3)",
+              border: "1px solid rgba(212, 168, 67, 0.1)",
+              background: "rgba(0,0,0,0.4)",
               position: "relative",
             }}
           >
@@ -223,20 +250,20 @@ function PlayCard({
                 position: "absolute",
                 top: 8,
                 left: 8,
-                fontFamily: "'Oswald', sans-serif",
+                fontFamily: "'Courier Prime', monospace",
                 fontSize: 9,
-                fontWeight: 600,
+                fontWeight: 700,
                 letterSpacing: 1.5,
                 textTransform: "uppercase",
                 color: "#d4a843",
-                background: "rgba(0,0,0,0.7)",
+                background: "rgba(0,0,0,0.8)",
                 backdropFilter: "blur(8px)",
                 padding: "4px 10px",
                 borderRadius: 6,
-                border: "1px solid rgba(212,168,67,0.2)",
+                border: "1px solid rgba(212, 168, 67, 0.2)",
               }}
             >
-              📸 Bet Slip
+              📋 VIEW SLIP
             </span>
             <img
               src={play.slipImage}
@@ -246,13 +273,13 @@ function PlayCard({
                 display: "block",
                 maxHeight: 220,
                 objectFit: "contain",
-                background: "#111",
+                background: "#0a0a0a",
               }}
             />
           </div>
         )}
 
-        {/* Matchup */}
+        {/* Game time footer */}
         <div
           style={{
             display: "flex",
@@ -264,8 +291,8 @@ function PlayCard({
         >
           <span
             style={{
-              fontSize: 13,
-              color: "#d4a843",
+              fontSize: 12,
+              color: "#6b7280",
               fontFamily: "'Courier Prime', monospace",
             }}
           >
@@ -282,7 +309,7 @@ function PlayCard({
           </span>
         </div>
 
-        {/* Admin result buttons */}
+        {/* Admin result buttons — styled like parlay WIN/LOSS/PUSH */}
         {isAdmin && (
           <div
             style={{
@@ -293,36 +320,37 @@ function PlayCard({
               borderTop: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            {(["win", "loss", "push", "pending"] as BetResult[]).map((r) => (
-              <button
-                key={r}
-                onClick={() => onUpdateResult(play.id, r)}
-                style={{
-                  flex: 1,
-                  padding: "8px 0",
-                  borderRadius: 8,
-                  border:
-                    play.result === r
-                      ? `2px solid ${RESULT_STYLES[r].text}`
-                      : `1px solid ${RESULT_STYLES[r].border}`,
-                  background:
-                    play.result === r
-                      ? RESULT_STYLES[r].bg
+            {(["win", "loss", "push"] as BetResult[]).map((r) => {
+              const s = RESULT_STYLES[r];
+              const isActive = play.result === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => onUpdateResult(play.id, r === play.result ? "pending" : r)}
+                  style={{
+                    flex: 1,
+                    padding: "10px 0",
+                    borderRadius: 8,
+                    border: isActive
+                      ? `2px solid ${s.text}`
+                      : `1px solid ${s.border}`,
+                    background: isActive
+                      ? s.bg
                       : "rgba(255,255,255,0.02)",
-                  color:
-                    play.result === r ? RESULT_STYLES[r].text : "#4b5563",
-                  fontSize: 11,
-                  fontFamily: "'Oswald', sans-serif",
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {r === "pending" ? "—" : r}
-              </button>
-            ))}
+                    color: isActive ? s.text : `${s.text}88`,
+                    fontSize: 13,
+                    fontFamily: "'Oswald', sans-serif",
+                    fontWeight: 700,
+                    letterSpacing: 3,
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {r.toUpperCase()}
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -330,16 +358,14 @@ function PlayCard({
         {isAdmin && (
           <div style={{ marginTop: 8 }}>
             <button
-              onClick={() => {
-                onDelete(play.id);
-              }}
+              onClick={() => onDelete(play.id)}
               style={{
                 width: "100%",
                 padding: "8px 0",
                 borderRadius: 8,
-                border: "1px solid rgba(239,68,68,0.2)",
-                background: "rgba(239,68,68,0.06)",
-                color: "#ef4444",
+                border: "1px solid rgba(239,68,68,0.15)",
+                background: "rgba(239,68,68,0.04)",
+                color: "#ef444488",
                 fontSize: 11,
                 fontFamily: "'Oswald', sans-serif",
                 fontWeight: 700,
@@ -349,7 +375,7 @@ function PlayCard({
                 transition: "all 0.2s ease",
               }}
             >
-              🗑 Delete Play
+              🗑 DELETE
             </button>
           </div>
         )}
@@ -370,8 +396,8 @@ function PaywallCard({ play }: { play: Play }) {
   return (
     <div
       style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "#111111",
+        border: "1px solid rgba(212, 168, 67, 0.15)",
         borderRadius: 16,
         overflow: "hidden",
         animation: "fadeSlideIn 0.5s ease forwards",
@@ -380,7 +406,7 @@ function PaywallCard({ play }: { play: Play }) {
       <div
         style={{
           height: 3,
-          background: "linear-gradient(90deg, #b8860b, #d4a843, #b8860b)",
+          background: "linear-gradient(90deg, transparent, #d4a843, transparent)",
         }}
       />
       <div style={{ padding: "20px 24px" }}>
@@ -404,9 +430,10 @@ function PaywallCard({ play }: { play: Play }) {
                   fontFamily: "'Courier Prime', monospace",
                   color: "#d4a843",
                   letterSpacing: 2,
+                  fontWeight: 700,
                 }}
               >
-                {play.sport}
+                STRAIGHT BET
               </div>
               <div
                 style={{
@@ -422,13 +449,14 @@ function PaywallCard({ play }: { play: Play }) {
           <span
             style={{
               fontSize: 10,
-              fontFamily: "'Oswald', sans-serif",
-              color: "#d4a843",
-              background: "rgba(212,168,67,0.1)",
-              border: "1px solid rgba(212,168,67,0.2)",
+              fontFamily: "'Courier Prime', monospace",
+              color: "#ef4444",
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.2)",
               borderRadius: 6,
               padding: "3px 10px",
               letterSpacing: 2,
+              fontWeight: 700,
             }}
           >
             🔒 LOCKED
@@ -436,7 +464,17 @@ function PaywallCard({ play }: { play: Play }) {
         </div>
 
         {/* Blurred pick */}
-        <div style={{ position: "relative", padding: "18px 0", marginBottom: 16 }}>
+        <div
+          style={{
+            background: "rgba(212, 168, 67, 0.03)",
+            border: "1px solid rgba(212, 168, 67, 0.08)",
+            borderRadius: 12,
+            padding: "16px 20px",
+            marginBottom: 16,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
           <div
             style={{
               filter: "blur(12px)",
@@ -446,23 +484,23 @@ function PaywallCard({ play }: { play: Play }) {
           >
             <div
               style={{
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: 800,
                 color: "#f5f5f5",
                 fontFamily: "'Oswald', sans-serif",
               }}
             >
-              Team Name -0.0
+              TEAM NAME +350
             </div>
             <div
               style={{
-                fontSize: 24,
-                fontWeight: 800,
+                fontSize: 13,
                 color: "#d4a843",
-                fontFamily: "'Oswald', sans-serif",
+                fontFamily: "'Courier Prime', monospace",
+                marginTop: 6,
               }}
             >
-              -000
+              MONEYLINE +350
             </div>
           </div>
         </div>
@@ -481,8 +519,8 @@ function PaywallCard({ play }: { play: Play }) {
         >
           <span
             style={{
-              fontSize: 13,
-              color: "#d4a843",
+              fontSize: 12,
+              color: "#6b7280",
               fontFamily: "'Courier Prime', monospace",
             }}
           >
@@ -505,9 +543,8 @@ function PaywallCard({ play }: { play: Play }) {
             marginTop: 18,
             padding: "16px 20px",
             borderRadius: 12,
-            background:
-              "linear-gradient(135deg, rgba(184,134,11,0.15), rgba(212,168,67,0.08))",
-            border: "1px solid rgba(212,168,67,0.25)",
+            background: "rgba(212, 168, 67, 0.04)",
+            border: "1px solid rgba(212, 168, 67, 0.15)",
             textAlign: "center",
           }}
         >
@@ -521,27 +558,27 @@ function PaywallCard({ play }: { play: Play }) {
               marginBottom: 6,
             }}
           >
-            🔥 Upgrade to unlock this play
+            🔒 UPGRADE TO UNLOCK
           </div>
           <div
             style={{
               fontSize: 11,
-              color: "#9ca3af",
+              color: "#6b7280",
               fontFamily: "'Courier Prime', monospace",
               marginBottom: 12,
               lineHeight: 1.5,
             }}
           >
-            Premium & High Roller members get instant access to all straight bets
+            Premium & High Roller members get all straight bet picks
           </div>
           <button
             onClick={handleUpgrade}
             style={{
               padding: "10px 28px",
               borderRadius: 10,
-              border: "none",
-              background: "linear-gradient(135deg, #b8860b, #d4a843)",
-              color: "#0a0a0a",
+              border: "1px solid rgba(212, 168, 67, 0.4)",
+              background: "rgba(212, 168, 67, 0.1)",
+              color: "#d4a843",
               fontSize: 12,
               fontFamily: "'Oswald', sans-serif",
               fontWeight: 700,
@@ -551,7 +588,7 @@ function PaywallCard({ play }: { play: Play }) {
               transition: "all 0.2s ease",
             }}
           >
-            Upgrade Now
+            UPGRADE NOW
           </button>
         </div>
       </div>
@@ -643,8 +680,8 @@ function AdminPanel({
     width: "100%",
     padding: "12px 14px",
     borderRadius: 10,
-    border: "1px solid rgba(255,255,255,0.1)",
-    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(212, 168, 67, 0.15)",
+    background: "rgba(212, 168, 67, 0.03)",
     color: "#f5f5f5",
     fontSize: 14,
     fontFamily: "'Courier Prime', monospace",
@@ -655,331 +692,345 @@ function AdminPanel({
 
   const labelStyle: React.CSSProperties = {
     fontSize: 10,
-    fontFamily: "'Oswald', sans-serif",
+    fontFamily: "'Courier Prime', monospace",
     color: "#d4a843",
     letterSpacing: 2,
     textTransform: "uppercase",
     marginBottom: 6,
     display: "block",
+    fontWeight: 700,
   };
 
   return (
     <div
       style={{
-        background: "rgba(0,0,0,0.5)",
-        backdropFilter: "blur(20px)",
+        background: "#111111",
         border: "1px solid rgba(212, 168, 67, 0.2)",
-        borderRadius: 20,
-        padding: 28,
-        marginBottom: 28,
+        borderRadius: 16,
+        overflow: "hidden",
         animation: "fadeSlideIn 0.4s ease forwards",
       }}
     >
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 24,
+          height: 3,
+          background: "linear-gradient(90deg, transparent, #d4a843, transparent)",
         }}
-      >
+      />
+      <div style={{ padding: "24px" }}>
         <div
           style={{
-            fontSize: 18,
-            fontFamily: "'Oswald', sans-serif",
-            fontWeight: 700,
-            color: "#d4a843",
-            letterSpacing: 3,
-            textTransform: "uppercase",
-          }}
-        >
-          🔥 Post New Play
-        </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#6b7280",
-            fontSize: 22,
-            cursor: "pointer",
-          }}
-        >
-          ×
-        </button>
-      </div>
-
-      {/* Bet Slip Upload */}
-      <div style={{ marginBottom: 20 }}>
-        <label
-          style={{
             display: "flex",
-            flexDirection: "column",
+            justifyContent: "space-between",
             alignItems: "center",
-            justifyContent: "center",
-            padding: scanPreview ? "12px" : "28px 20px",
-            borderRadius: 14,
-            border: scanning
-              ? "2px solid rgba(212,168,67,0.5)"
-              : "2px dashed rgba(255,255,255,0.12)",
-            background: scanning
-              ? "rgba(212,168,67,0.06)"
-              : "rgba(255,255,255,0.02)",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            overflow: "hidden",
+            marginBottom: 24,
           }}
         >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleSlipUpload}
-            style={{ display: "none" }}
-          />
-          {scanning ? (
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>🤖</div>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontFamily: "'Oswald', sans-serif",
-                  color: "#d4a843",
-                  letterSpacing: 2,
-                }}
-              >
-                SCANNING BET SLIP...
-              </div>
-            </div>
-          ) : scanPreview ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 16,
-                width: "100%",
-              }}
-            >
-              <img
-                src={scanPreview}
-                alt="Bet slip"
-                style={{
-                  width: 60,
-                  height: 60,
-                  objectFit: "cover",
-                  borderRadius: 8,
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              />
-              <div>
+          <div
+            style={{
+              fontSize: 14,
+              fontFamily: "'Courier Prime', monospace",
+              fontWeight: 700,
+              color: "#d4a843",
+              letterSpacing: 3,
+              textTransform: "uppercase",
+            }}
+          >
+            🎯 NEW STRAIGHT BET
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#6b7280",
+              fontSize: 16,
+              cursor: "pointer",
+              borderRadius: 8,
+              width: 32,
+              height: 32,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Bet Slip Upload */}
+        <div style={{ marginBottom: 20 }}>
+          <label
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: scanPreview ? "12px" : "28px 20px",
+              borderRadius: 12,
+              border: scanning
+                ? "2px solid rgba(212, 168, 67, 0.4)"
+                : "2px dashed rgba(212, 168, 67, 0.15)",
+              background: scanning
+                ? "rgba(212, 168, 67, 0.06)"
+                : "rgba(212, 168, 67, 0.02)",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              overflow: "hidden",
+            }}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleSlipUpload}
+              style={{ display: "none" }}
+            />
+            {scanning ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>🤖</div>
                 <div
                   style={{
                     fontSize: 12,
-                    fontFamily: "'Oswald', sans-serif",
-                    color: "#22c55e",
+                    fontFamily: "'Courier Prime', monospace",
+                    color: "#d4a843",
                     letterSpacing: 2,
+                    fontWeight: 700,
                   }}
                 >
-                  ✓ SLIP SCANNED
-                </div>
-                <div style={{ fontSize: 11, color: "#6b7280" }}>
-                  Review below and tap to re-upload
+                  SCANNING BET SLIP...
                 </div>
               </div>
+            ) : scanPreview ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 16,
+                  width: "100%",
+                }}
+              >
+                <img
+                  src={scanPreview}
+                  alt="Bet slip"
+                  style={{
+                    width: 60,
+                    height: 60,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    border: "1px solid rgba(212, 168, 67, 0.2)",
+                  }}
+                />
+                <div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontFamily: "'Courier Prime', monospace",
+                      color: "#22c55e",
+                      letterSpacing: 2,
+                      fontWeight: 700,
+                    }}
+                  >
+                    ✓ SLIP SCANNED
+                  </div>
+                  <div style={{ fontSize: 11, color: "#6b7280" }}>
+                    Review below · tap to re-upload
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>📸</div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "'Courier Prime', monospace",
+                    color: "#d4a843",
+                    letterSpacing: 2,
+                    fontWeight: 700,
+                    marginBottom: 4,
+                  }}
+                >
+                  UPLOAD BET SLIP
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#6b7280",
+                    textAlign: "center",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  DraftKings, FanDuel, etc. — AI auto-fills
+                </div>
+              </>
+            )}
+          </label>
+          {scanError && (
+            <div
+              style={{
+                marginTop: 8,
+                padding: "10px 14px",
+                borderRadius: 10,
+                background: "rgba(239,68,68,0.08)",
+                border: "1px solid rgba(239,68,68,0.2)",
+                color: "#ef4444",
+                fontSize: 12,
+              }}
+            >
+              {scanError}
             </div>
-          ) : (
-            <>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>📸</div>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontFamily: "'Oswald', sans-serif",
-                  color: "#d4a843",
-                  letterSpacing: 2,
-                  marginBottom: 4,
-                }}
-              >
-                UPLOAD BET SLIP
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "#6b7280",
-                  textAlign: "center",
-                  lineHeight: 1.5,
-                }}
-              >
-                Drop a screenshot from DraftKings, FanDuel, etc.
-                <br />
-                AI will auto-fill the play details
-              </div>
-            </>
           )}
-        </label>
-        {scanError && (
-          <div
-            style={{
-              marginTop: 8,
-              padding: "10px 14px",
-              borderRadius: 10,
-              background: "rgba(239,68,68,0.08)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              color: "#ef4444",
-              fontSize: 12,
-            }}
-          >
-            {scanError}
-          </div>
-        )}
-      </div>
+        </div>
 
-      {/* Divider */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          marginBottom: 20,
-        }}
-      >
+        {/* Divider */}
         <div
-          style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }}
-        />
-        <span
           style={{
-            fontSize: 10,
-            fontFamily: "'Oswald', sans-serif",
-            color: "#4b5563",
-            letterSpacing: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 20,
           }}
         >
-          OR FILL MANUALLY
-        </span>
+          <div
+            style={{ flex: 1, height: 1, background: "rgba(212, 168, 67, 0.1)" }}
+          />
+          <span
+            style={{
+              fontSize: 10,
+              fontFamily: "'Courier Prime', monospace",
+              color: "#4b5563",
+              letterSpacing: 2,
+              fontWeight: 700,
+            }}
+          >
+            OR MANUAL
+          </span>
+          <div
+            style={{ flex: 1, height: 1, background: "rgba(212, 168, 67, 0.1)" }}
+          />
+        </div>
+
+        {/* Form fields */}
         <div
-          style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }}
-        />
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 16,
+            marginBottom: 16,
+          }}
+        >
+          <div>
+            <label style={labelStyle}>Pick / Team</label>
+            <input
+              style={inputStyle}
+              placeholder="e.g. Duke -9.5"
+              value={team}
+              onChange={(e) => setTeam(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Odds</label>
+            <input
+              style={inputStyle}
+              placeholder="e.g. +350"
+              value={odds}
+              onChange={(e) => setOdds(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 16,
+            marginBottom: 16,
+          }}
+        >
+          <div>
+            <label style={labelStyle}>Matchup</label>
+            <input
+              style={inputStyle}
+              placeholder="e.g. Clemson @ Duke"
+              value={matchup}
+              onChange={(e) => setMatchup(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Game Time</label>
+            <input
+              style={inputStyle}
+              placeholder="e.g. 8:00PM ET"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 16,
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <label style={labelStyle}>Sport</label>
+            <select
+              style={{ ...inputStyle, cursor: "pointer", appearance: "none" as any }}
+              value={sport}
+              onChange={(e) => setSport(e.target.value as Sport)}
+            >
+              {SPORTS.map((s) => (
+                <option key={s} value={s} style={{ background: "#111111" }}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Bet Type</label>
+            <select
+              style={{ ...inputStyle, cursor: "pointer", appearance: "none" as any }}
+              value={betType}
+              onChange={(e) => setBetType(e.target.value as BetType)}
+            >
+              {BET_TYPES.map((b) => (
+                <option key={b} value={b} style={{ background: "#111111" }}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <button
+          onClick={handlePost}
+          disabled={!team || !odds || !matchup || !time}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: 10,
+            border: !team || !odds || !matchup || !time
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(212, 168, 67, 0.4)",
+            background: !team || !odds || !matchup || !time
+              ? "rgba(255,255,255,0.03)"
+              : "rgba(212, 168, 67, 0.12)",
+            color: !team || !odds || !matchup || !time ? "#4b5563" : "#d4a843",
+            fontSize: 14,
+            fontFamily: "'Oswald', sans-serif",
+            fontWeight: 700,
+            letterSpacing: 3,
+            textTransform: "uppercase",
+            cursor: !team || !odds || !matchup || !time ? "not-allowed" : "pointer",
+            transition: "all 0.3s ease",
+          }}
+        >
+          DROP PLAY 🎯
+        </button>
       </div>
-
-      {/* Form fields */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-          marginBottom: 16,
-        }}
-      >
-        <div>
-          <label style={labelStyle}>Pick / Team</label>
-          <input
-            style={inputStyle}
-            placeholder="e.g. Duke -9.5"
-            value={team}
-            onChange={(e) => setTeam(e.target.value)}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Odds</label>
-          <input
-            style={inputStyle}
-            placeholder="e.g. -192"
-            value={odds}
-            onChange={(e) => setOdds(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-          marginBottom: 16,
-        }}
-      >
-        <div>
-          <label style={labelStyle}>Matchup</label>
-          <input
-            style={inputStyle}
-            placeholder="e.g. Clemson @ Duke"
-            value={matchup}
-            onChange={(e) => setMatchup(e.target.value)}
-          />
-        </div>
-        <div>
-          <label style={labelStyle}>Game Time</label>
-          <input
-            style={inputStyle}
-            placeholder="e.g. 8:00PM ET"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <label style={labelStyle}>Sport</label>
-          <select
-            style={{ ...inputStyle, cursor: "pointer", appearance: "none" as any }}
-            value={sport}
-            onChange={(e) => setSport(e.target.value as Sport)}
-          >
-            {SPORTS.map((s) => (
-              <option key={s} value={s} style={{ background: "#111" }}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label style={labelStyle}>Bet Type</label>
-          <select
-            style={{ ...inputStyle, cursor: "pointer", appearance: "none" as any }}
-            value={betType}
-            onChange={(e) => setBetType(e.target.value as BetType)}
-          >
-            {BET_TYPES.map((b) => (
-              <option key={b} value={b} style={{ background: "#111" }}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-
-      <button
-        onClick={handlePost}
-        disabled={!team || !odds || !matchup || !time}
-        style={{
-          width: "100%",
-          padding: "14px",
-          borderRadius: 12,
-          border: "none",
-          background:
-            !team || !odds || !matchup || !time
-              ? "rgba(255,255,255,0.05)"
-              : "linear-gradient(135deg, #b8860b, #d4a843)",
-          color:
-            !team || !odds || !matchup || !time ? "#4b5563" : "#0a0a0a",
-          fontSize: 14,
-          fontFamily: "'Oswald', sans-serif",
-          fontWeight: 700,
-          letterSpacing: 3,
-          textTransform: "uppercase",
-          cursor:
-            !team || !odds || !matchup || !time ? "not-allowed" : "pointer",
-          transition: "all 0.3s ease",
-        }}
-      >
-        Drop Play 🔥
-      </button>
     </div>
   );
 }
@@ -999,7 +1050,6 @@ export default function StraightBetsClient({
 
   const { hasPremiumAccess, isAdmin } = userAccess;
 
-  // Fetch plays on mount
   const fetchPlays = useCallback(async () => {
     try {
       const res = await fetch("/api/plays");
@@ -1019,7 +1069,6 @@ export default function StraightBetsClient({
     return () => clearInterval(interval);
   }, [fetchPlays]);
 
-  // Post a new play
   const handlePost = async (playData: any) => {
     try {
       const res = await fetch("/api/plays", {
@@ -1033,7 +1082,6 @@ export default function StraightBetsClient({
         setPlays((prev) => [data.play, ...prev]);
         setShowAdmin(false);
 
-        // Send push notification
         try {
           await fetch("/api/notify", {
             method: "POST",
@@ -1048,7 +1096,6 @@ export default function StraightBetsClient({
           console.error("Notification error:", err);
         }
 
-        // Show in-app notification
         setNotification(data.play);
         setTimeout(() => setNotification(null), 6000);
       }
@@ -1057,7 +1104,6 @@ export default function StraightBetsClient({
     }
   };
 
-  // Update play result
   const handleUpdateResult = async (id: string, result: BetResult) => {
     try {
       const res = await fetch("/api/plays", {
@@ -1076,7 +1122,6 @@ export default function StraightBetsClient({
     }
   };
 
-  // Delete play
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch("/api/plays", {
@@ -1116,8 +1161,8 @@ export default function StraightBetsClient({
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulseGlow {
-          0%, 100% { box-shadow: 0 0 20px rgba(212, 168, 67, 0.1); }
-          50% { box-shadow: 0 0 30px rgba(212, 168, 67, 0.2); }
+          0%, 100% { box-shadow: 0 0 20px rgba(212, 168, 67, 0.08); }
+          50% { box-shadow: 0 0 40px rgba(212, 168, 67, 0.15); }
         }
         @keyframes slideDown {
           from { opacity: 0; transform: translateY(-100%); }
@@ -1125,8 +1170,8 @@ export default function StraightBetsClient({
         }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.3); border-radius: 3px; }
-        select option { background: #111 !important; color: #f5f5f5; }
+        ::-webkit-scrollbar-thumb { background: rgba(212, 168, 67, 0.2); border-radius: 3px; }
+        select option { background: #111111 !important; color: #f5f5f5; }
       `}</style>
 
       {/* Notification Banner */}
@@ -1147,12 +1192,12 @@ export default function StraightBetsClient({
               maxWidth: 640,
               margin: "12px auto",
               padding: "14px 18px",
-              borderRadius: 16,
-              background: "rgba(15,15,15,0.95)",
+              borderRadius: 14,
+              background: "rgba(13,17,23,0.95)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(212,168,67,0.3)",
+              border: "1px solid rgba(212, 168, 67, 0.3)",
               boxShadow:
-                "0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(212,168,67,0.1)",
+                "0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(212, 168, 67, 0.1)",
               display: "flex",
               alignItems: "center",
               gap: 14,
@@ -1163,7 +1208,8 @@ export default function StraightBetsClient({
                 width: 40,
                 height: 40,
                 borderRadius: 10,
-                background: "linear-gradient(135deg, #b8860b, #d4a843)",
+                background: "rgba(212, 168, 67, 0.12)",
+                border: "1px solid rgba(212, 168, 67, 0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1171,19 +1217,20 @@ export default function StraightBetsClient({
                 flexShrink: 0,
               }}
             >
-              🔥
+              🎯
             </div>
             <div style={{ flex: 1 }}>
               <div
                 style={{
                   fontSize: 11,
-                  fontFamily: "'Oswald', sans-serif",
+                  fontFamily: "'Courier Prime', monospace",
                   color: "#d4a843",
                   letterSpacing: 2,
                   marginBottom: 2,
+                  fontWeight: 700,
                 }}
               >
-                FLAREGOTLOCKS • STRAIGHT BET
+                STRAIGHT BET
               </div>
               <div
                 style={{
@@ -1195,7 +1242,7 @@ export default function StraightBetsClient({
               >
                 {hasPremiumAccess || isAdmin
                   ? `${notification.team} (${notification.odds})`
-                  : "New play just dropped! Upgrade to view"}
+                  : "New straight bet dropped! Upgrade to view"}
               </div>
             </div>
             <button
@@ -1214,13 +1261,13 @@ export default function StraightBetsClient({
         </div>
       )}
 
-      {/* Background */}
+      {/* Background glow */}
       <div
         style={{
           position: "fixed",
           inset: 0,
           backgroundImage:
-            "radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.06) 0%, transparent 60%)",
+            "radial-gradient(ellipse at 50% 0%, rgba(212, 168, 67, 0.04) 0%, transparent 60%)",
           pointerEvents: "none",
         }}
       />
@@ -1245,23 +1292,24 @@ export default function StraightBetsClient({
             style={{
               display: "inline-block",
               fontSize: 10,
-              fontFamily: "'Oswald', sans-serif",
+              fontFamily: "'Courier Prime', monospace",
               color: "#d4a843",
               letterSpacing: 4,
               textTransform: "uppercase",
-              border: "1px solid rgba(212,168,67,0.3)",
+              border: "1px solid rgba(212, 168, 67, 0.3)",
               borderRadius: 100,
               padding: "6px 20px",
               marginBottom: 20,
-              background: "rgba(212,168,67,0.06)",
+              background: "rgba(212, 168, 67, 0.06)",
+              fontWeight: 700,
             }}
           >
-            Live Feed
+            🎯 Live Feed
           </div>
 
           <h1
             style={{
-              fontSize: 52,
+              fontSize: 48,
               fontFamily: "'Oswald', sans-serif",
               fontWeight: 800,
               lineHeight: 1,
@@ -1273,10 +1321,7 @@ export default function StraightBetsClient({
             <br />
             <span
               style={{
-                background:
-                  "linear-gradient(135deg, #b8860b, #d4a843, #f0d078)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                color: "#d4a843",
               }}
             >
               Bets
@@ -1285,11 +1330,12 @@ export default function StraightBetsClient({
 
           <p
             style={{
-              fontSize: 14,
+              fontSize: 13,
               color: "#6b7280",
               maxWidth: 380,
               margin: "12px auto 0",
               lineHeight: 1.6,
+              fontFamily: "'Courier Prime', monospace",
             }}
           >
             Every straight bet play, posted live.
@@ -1314,20 +1360,20 @@ export default function StraightBetsClient({
               onClick={() => setFilter(f.key)}
               style={{
                 padding: "8px 18px",
-                borderRadius: 10,
+                borderRadius: 8,
                 border:
                   filter === f.key
-                    ? "1px solid rgba(212,168,67,0.4)"
+                    ? "1px solid rgba(212, 168, 67, 0.4)"
                     : "1px solid rgba(255,255,255,0.08)",
                 background:
                   filter === f.key
-                    ? "rgba(212,168,67,0.12)"
+                    ? "rgba(212, 168, 67, 0.1)"
                     : "rgba(255,255,255,0.02)",
                 color: filter === f.key ? "#d4a843" : "#6b7280",
                 fontSize: 12,
-                fontFamily: "'Oswald', sans-serif",
-                fontWeight: 600,
-                letterSpacing: 1.5,
+                fontFamily: "'Courier Prime', monospace",
+                fontWeight: 700,
+                letterSpacing: 2,
                 textTransform: "uppercase",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
@@ -1338,12 +1384,12 @@ export default function StraightBetsClient({
           ))}
         </div>
 
-        {/* Admin-only record section */}
+        {/* Admin record */}
         {isAdmin && (
           <div
             style={{
               display: "flex",
-              gap: 12,
+              gap: 8,
               marginBottom: 24,
             }}
           >
@@ -1352,21 +1398,21 @@ export default function StraightBetsClient({
                 label: "WON",
                 value: record.wins,
                 color: "#22c55e",
-                bg: "rgba(34, 197, 94, 0.08)",
+                bg: "rgba(34, 197, 94, 0.06)",
                 border: "rgba(34, 197, 94, 0.25)",
               },
               {
                 label: "LOST",
                 value: record.losses,
                 color: "#ef4444",
-                bg: "rgba(239, 68, 68, 0.08)",
+                bg: "rgba(239, 68, 68, 0.06)",
                 border: "rgba(239, 68, 68, 0.25)",
               },
               {
                 label: "PUSH",
                 value: record.pushes,
                 color: "#eab308",
-                bg: "rgba(234, 179, 8, 0.08)",
+                bg: "rgba(234, 179, 8, 0.06)",
                 border: "rgba(234, 179, 8, 0.25)",
               },
             ].map((stat) => (
@@ -1396,10 +1442,11 @@ export default function StraightBetsClient({
                 <div
                   style={{
                     fontSize: 10,
-                    fontFamily: "'Oswald', sans-serif",
+                    fontFamily: "'Courier Prime', monospace",
                     color: stat.color,
                     letterSpacing: 2,
                     opacity: 0.7,
+                    fontWeight: 700,
                   }}
                 >
                   {stat.label}
@@ -1420,20 +1467,20 @@ export default function StraightBetsClient({
                 style={{
                   width: "100%",
                   padding: "14px",
-                  borderRadius: 14,
-                  border: "1px solid rgba(212,168,67,0.2)",
-                  background: "rgba(212,168,67,0.06)",
+                  borderRadius: 12,
+                  border: "1px solid rgba(212, 168, 67, 0.2)",
+                  background: "rgba(212, 168, 67, 0.06)",
                   color: "#d4a843",
-                  fontSize: 13,
-                  fontFamily: "'Oswald', sans-serif",
-                  fontWeight: 600,
+                  fontSize: 12,
+                  fontFamily: "'Courier Prime', monospace",
+                  fontWeight: 700,
                   letterSpacing: 3,
                   textTransform: "uppercase",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                 }}
               >
-                ⚙ Admin — Post New Play
+                ⚙ ADMIN — POST NEW PLAY
               </button>
             )}
           </div>
@@ -1446,7 +1493,8 @@ export default function StraightBetsClient({
               textAlign: "center",
               padding: "60px 20px",
               color: "#6b7280",
-              fontSize: 14,
+              fontSize: 13,
+              fontFamily: "'Courier Prime', monospace",
             }}
           >
             Loading plays...
@@ -1461,10 +1509,11 @@ export default function StraightBetsClient({
                     textAlign: "center",
                     padding: "60px 20px",
                     color: "#4b5563",
-                    fontSize: 14,
+                    fontSize: 13,
+                    fontFamily: "'Courier Prime', monospace",
                   }}
                 >
-                  No plays to show for this filter.
+                  No plays yet. Check back soon.
                 </div>
               ) : hasPremiumAccess || isAdmin ? (
                 pendingPlays.map((play) => (
@@ -1483,7 +1532,7 @@ export default function StraightBetsClient({
               )}
             </div>
 
-            {/* Admin-only graded plays history */}
+            {/* Graded plays */}
             {isAdmin && gradedPlays.length > 0 && (
               <div style={{ marginTop: 36 }}>
                 <button
@@ -1491,13 +1540,13 @@ export default function StraightBetsClient({
                   style={{
                     width: "100%",
                     padding: "14px",
-                    borderRadius: 14,
+                    borderRadius: 12,
                     border: "1px solid rgba(255,255,255,0.08)",
                     background: "rgba(255,255,255,0.02)",
                     color: "#6b7280",
-                    fontSize: 13,
-                    fontFamily: "'Oswald', sans-serif",
-                    fontWeight: 600,
+                    fontSize: 12,
+                    fontFamily: "'Courier Prime', monospace",
+                    fontWeight: 700,
                     letterSpacing: 3,
                     textTransform: "uppercase",
                     cursor: "pointer",
@@ -1508,7 +1557,7 @@ export default function StraightBetsClient({
                     gap: 10,
                   }}
                 >
-                  <span>📋 Graded Plays ({gradedPlays.length})</span>
+                  <span>📋 GRADED ({gradedPlays.length})</span>
                   <span
                     style={{
                       transform: showGraded
@@ -1559,13 +1608,14 @@ export default function StraightBetsClient({
           <div
             style={{
               fontSize: 11,
-              color: "#374151",
-              fontFamily: "'Oswald', sans-serif",
+              color: "#1f2937",
+              fontFamily: "'Courier Prime', monospace",
               letterSpacing: 3,
               textTransform: "uppercase",
+              fontWeight: 700,
             }}
           >
-            FlareGotLocks
+            RWTW
           </div>
         </div>
       </div>
